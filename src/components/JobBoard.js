@@ -1,19 +1,16 @@
 import JobList from "./JobList";
-import { getJobs } from "../graphql/queries.js";
-import { useEffect, useState } from "react";
+import { useJobs } from "../graphql/hooks";
 
 function JobBoard() {
-  const [jobs, setJobs] = useState([]);
-  const [error, setError] = useState(false);
-  useEffect(() => {
-    getJobs()
-      .then(setJobs)
-      .catch((err) => setError(true));
-  }, []);
+  const { jobs, loading, error } = useJobs();
+  if (loading) {
+    return <p>Loading...</p>;
+  }
 
   if (error) {
     return <p>Sorry, something went wrong...</p>;
   }
+
   return (
     <div>
       <h1 className="title">Job Board</h1>
