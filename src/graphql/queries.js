@@ -19,7 +19,7 @@ const JOB_DETAIL_FRAGMENT = gql`
   }
 `;
 
-const JOB_QUERY = gql`
+export const JOB_QUERY = gql`
   query jobQuery($id: ID!) {
     job(id: $id) {
       ...JobDetail
@@ -36,6 +36,20 @@ export const JOBS_QUERY = gql`
       company {
         id
         name
+      }
+    }
+  }
+`;
+
+export const COMPANY_QUERY = gql`
+  query getCompany($id: ID!) {
+    company(id: $id) {
+      id
+      name
+      description
+      jobs {
+        title
+        description
       }
     }
   }
@@ -74,34 +88,4 @@ export async function createJob(input) {
   });
   console.log(job);
   return job;
-}
-
-export async function getJob(id) {
-  const variables = { id };
-  const {
-    data: { job },
-  } = await client.query({ query: JOB_QUERY, variables });
-  return job;
-}
-
-export async function getCompany(id) {
-  const query = gql`
-    query getCompany($id: ID!) {
-      company(id: $id) {
-        id
-        name
-        description
-        jobs {
-          title
-          description
-        }
-      }
-    }
-  `;
-  const variables = { id };
-  const {
-    data: { company },
-  } = await client.query({ query, variables });
-  console.log(company);
-  return company;
 }
