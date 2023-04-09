@@ -1,16 +1,32 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { createJob } from "../graphql/queries";
+import { CREATE_JOB_MUTATION, JOB_QUERY, createJob } from "../graphql/queries";
+import { useMutation } from "@apollo/client";
+import { getAccessToken } from "../auth";
 
 function JobForm() {
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [mutate] = useMutation(CREATE_JOB_MUTATION);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log("should post a new job:", { title, description });
-    const job = await createJob({ title, description });
+    // console.log("should post a new job:", { title, description });
+    // const job = await createJob({ title, description });
+    const {
+      data: { job },
+    } = await mutate({
+      variables: { input: { title, description } },
+      context: { headers: { Authorization: "Bearer " + getAccessToken() } },
+      update: (cache, { data: { job } }) => {
+        cache.writeQuery({
+          query: JOB_QUERY,
+          variables: { id: job.id },
+          data: { job },
+        });
+      },
+    });
     navigate(`/jobs/${job.id}`);
   };
 
